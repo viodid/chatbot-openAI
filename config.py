@@ -5,4 +5,5 @@ print(basedir)
 
 
 class Config:
+    """Set Flask configuration vars from .env file."""
     SECRET_KEY = os.environ.get('SECRET_KEY')
