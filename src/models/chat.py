@@ -50,7 +50,6 @@ class Chat():
         response = openai.ChatCompletion.create(
             engine = MODEL_NAME,
             messages = self.conversation,
-            n = 2,
             max_tokens = 3500
         )
 
