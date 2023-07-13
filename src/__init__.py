@@ -13,16 +13,19 @@ chat = Chat()
 
 @app.route('/')
 def home_page():
+    """Render the home page."""
     return render_template('index.html')
 
 
 @app.route('/refresh')
 def refresh_history():
+    """Clear the chat history."""
     Chat.refresh_history(chat)
     return redirect(url_for('home_page'))
 
 
 @socketio.on('messages')
 def handle_message(data):
+    """Handle a message sent by the user."""
     print(repr(chat))
     emit('ai_answer', Chat.get_ai_answer(chat, data['data']), broadcast=False)
