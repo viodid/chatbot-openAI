@@ -1,5 +1,5 @@
 """Entry point for the application."""
-from flask import Flask, render_template, request
+from flask import Flask, render_template, redirect, url_for
 from flask_socketio import SocketIO, emit
 
 from src.models.chat import Chat
@@ -7,27 +7,22 @@ from config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
-socketio = SocketIO(app)
+socketio = SocketIO(app, logger=True, engineio_logger=True)
+
+chat = Chat()
 
 @app.route('/')
 def home_page():
     return render_template('index.html')
 
 
-@app.route('/chatbot', methods=['POST'])
-def chatbot_page():
-    query = request.form['query']
-    response = Chat.conversate(query)
-    return render_template('index.html', response=response)
+@app.route('/refresh')
+def refresh_history():
+    Chat.refresh_history(chat)
+    return redirect(url_for('home_page'))
 
-@socketio.on('connect')
-def handle_connect():
-    print('connected')
 
-@socketio.on('message')
+@socketio.on('messages')
 def handle_message(data):
-    print(data)
-
-@socketio.emit('response')
-def handle_response(data):
-    print(data)
+    print(repr(chat))
+    emit('ai_answer', Chat.get_ai_answer(chat, data['data']), broadcast=False)

@@ -191,4 +191,27 @@ strong {
   cursor: pointer;
 }
 
+.new-chat {
+  display: block;
+  position: absolute;
+  top: 13%;
+}
+
+button {
+  width: 125px;
+  height: 40px;
+  border-radius: 7px;
+  border: none;
+  font-size: 15px;
+}
+
+button:hover {
+  cursor: pointer;
+  background-color: #ddd;
+}
+
+button:active {
+  background-color: #bbb;
+}
+
 /*# sourceMappingURL=main.css.map */
