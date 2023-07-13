@@ -1,0 +1,101 @@
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  - group: 'common'
+  - name: K8S_CONTAINER_NAME
+    value: chatbot-container
+  - name: K8S_DEPLOYMENT_NAME
+    value: chatbot-deployment
+  - name: K8S_DEPLOYMENT_NAMESPACE
+    value: chatbot-tck
+  - name: AZURE_ACR_IMAGE_NAME
+    value: chatbot-app
+  - name: SONAR_PROJECT_NAME
+    value: $(AZURE_ACR_IMAGE_NAME)
+  - name: AZURE_AKS_SERVICE_CONNECTION
+    value: glia-azure-kubernetes-chatbot
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Test
+  jobs:
+    - job: Test
+      steps:
+      - task: SonarQubePrepare@5
+        inputs:
+          SonarQube: $(SONAR_CONNECTION)
+          scannerMode: 'CLI'
+          configMode: 'manual'
+          cliProjectKey: $(AZURE_ACR_IMAGE_NAME)
+          cliProjectName: $(SONAR_PROJECT_NAME)
+          cliSources: '.'
+
+      - task: CmdLine@2
+        inputs:
+          displayName: 'Remove branch name from SonarQube params'
+          script: |
+            params=$(echo "${SONARQUBE_SCANNER_PARAMS}" | sed -e 's/"sonar.branch.name":"[^"]*",//')
+            echo "##vso[task.setvariable variable=SONARQUBE_SCANNER_PARAMS;]$params"
+
+      - task: SonarQubeAnalyze@5
+      - task: SonarQubePublish@5
+
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    steps:
+      - task: Docker@2
+        displayName: Build and push an image to container registry
+        inputs:
+          containerRegistry: $(AZURE_ACR_NAME)
+          repository: $(AZURE_ACR_IMAGE_NAME)
+          command: 'buildAndPush'
+          Dockerfile: '**/Dockerfile'
+          tags: |
+            $(TAG)
+            latest
+
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    environment: 'dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: Kubernetes@1
+            displayName: 'Deploy to AKS'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: $(AZURE_AKS_SERVICE_CONNECTION)
+              namespace: $(K8S_DEPLOYMENT_NAMESPACE)
+              command: 'set'
+              arguments: |
+                image deployment/$(K8S_DEPLOYMENT_NAME) $(K8S_CONTAINER_NAME)=$(AZURE_ACR_ADDRESS)/$(AZURE_ACR_IMAGE_NAME):$(TAG)
+
+          - task: Kubernetes@1
+            displayName: Check succesfuly deploy image to kubernetes
+            inputs:
+              connectionType: Kubernetes Service Connection
+              kubernetesServiceEndpoint: $(AZURE_AKS_SERVICE_CONNECTION)
+              namespace: $(K8S_DEPLOYMENT_NAMESPACE)
+              command: rollout
+              arguments: status deployment/$(K8S_DEPLOYMENT_NAME) -w
+          - task: Kubernetes@1
+            displayName: Failure Logs
+            condition: failed()
+            inputs:
+              connectionType: Kubernetes Service Connection
+              kubernetesServiceEndpoint: $(AZURE_AKS_SERVICE_CONNECTION)
+              namespace: $(K8S_DEPLOYMENT_NAMESPACE)
+              command: logs
+              arguments: -l service=$(K8S_DEPLOYMENT_NAME) -c $(K8S_DEPLOYMENT_NAME)
