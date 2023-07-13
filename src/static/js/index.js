@@ -10,18 +10,28 @@ $ChatInput.keyup(function (e) {
     const newText = $this.html();
     $this.html('');
     $('.ChatWindow').append(`\
-<div class="ChatItem ChatItem--expert"> \
-<div class="ChatItem-meta"> \
-<div class="ChatItem-avatar"> \
-<img class="ChatItem-avatarImage" src="https://randomuser.me/api/portraits/women/0.jpg"> \
-</div> \
-</div> \
-<div class="ChatItem-chatContent"> \
-<div class="ChatItem-chatText">` + newText + `</div> \
-<div class="ChatItem-timeStamp"><strong>Me</strong> · Today 05:49</div> \
-</div> \
-</div>\
-`);
+    <div class="ChatItem ChatItem--expert"> \
+    <div class="ChatItem-meta"> \
+    <div class="ChatItem-avatar"> \
+    <img class="ChatItem-avatarImage" src="https://randomuser.me/api/portraits/women/0.jpg"> \
+    </div> \
+    </div> \
+    <div class="ChatItem-chatContent"> \
+    <div class="ChatItem-chatText">` + newText + `</div> \
+    <div class="ChatItem-timeStamp"><strong>Me</strong> · Today 05:49</div> \
+    </div> \
+    </div>\
+  `);
     return $('.ChatWindow').animate({ scrollTop: $('.ChatWindow').prop("scrollHeight") }, 500);
   }
 });
+
+var socket = io();
+
+console.log(socket);
+
+socket.on('connect', function () {
+  socket.emit('my event', { data: 'I\'m connected!' });
+});
+
+socket.emit('message', { data: 'Hello world!' });
