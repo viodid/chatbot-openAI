@@ -66,7 +66,7 @@ The chatbot will be accessible at `http://localhost:8888` just like when running
 
 <p>For more details, please refer to the <a href="https://unlicense.org">Unlicense</a> website.</p>
 
-<p>Feel free to make this project your own and use it for any purpose you desire. Happy coding! 🚀</p>
+<p>Feel free to make this project your own and use it for any purpose you desire.</p>
 
 
 ## Acknowledgments
