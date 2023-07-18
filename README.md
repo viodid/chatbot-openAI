@@ -71,7 +71,7 @@ The chatbot will be accessible at `http://localhost:8888` just like when running
 
 ## Acknowledgments
 
-The chatbot UI design is based on a CodePen design created by Zenworm, which can be found at [source](https://codepen.io/zenworm/pen/KqLNPm). We express our gratitude for their contribution.
+The chatbot UI design is based on a CodePen design created by Zenworm, which can be found at [source](https://codepen.io/zenworm/pen/KqLNPm).
 
 ## Contributing
 
