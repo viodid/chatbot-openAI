@@ -1,12 +1,13 @@
 """Chatbot model."""
-import os
 import openai
 
-openai.api_type = os.getenv("OPENAI_API_TYPE") 
-openai.api_version = os.getenv("OPENAI_API_VERSION")
-openai.api_base = os.getenv("OPENAI_API_ENDPOINT")
-openai.api_key = os.getenv("OPENAI_API_KEY")
-MODEL_NAME = os.getenv("OPENAI_COMPLETIONS_ENGINE")
+from config import Config
+
+openai.api_type = Config.OPENAI_API_TYPE
+openai.api_version = Config.OPENAI_API_VERSION
+openai.api_base = Config.OPENAI_API_ENDPOINT
+openai.api_key = Config.OPENAI_API_KEY
+MODEL_NAME = Config.OPENAI_COMPLETIONS_ENGINE
 
 class Chat():
     """A class for our chatbot."""
